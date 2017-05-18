@@ -4,10 +4,10 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>Viasock – Automagically Serverize Your Pipelines</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+		<link rel="stylesheet" href="css/theme/league.css">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -20,12 +20,412 @@
 			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
 			document.getElementsByTagName( 'head' )[0].appendChild( link );
 		</script>
+
+		<!-- Custom styles -->
+		<style>
+			b {
+				color: orange;
+			}
+
+			code {
+				color: #88bbff;
+			}
+			
+			@media print {
+				.reveal pre code {
+					max-height: none;
+					white-space: pre-wrap;
+				}
+			}
+
+			a.pygrunn-logo {
+				width: 167px;
+				height: 60px;
+				background: url(img/pygrunn_logo_2017.png) no-repeat 0 0;
+				background-size: contain;
+				display: inline-block;
+			}
+
+			.reveal section img.noborder {
+				border: none;
+				background: none;
+				box-shadow: none;
+			}
+
+			table.nolines td {
+				border-bottom: none;
+			}
+
+			.reveal code {
+				text-transform: none;
+			}
+		</style>
 	</head>
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section>
+					<h1>Viasock</h1>
+					<h3>Automagically Serverize Your Pipelines</h3>
+					<p><a href=https://kilian.evang.name>Kilian Evang</a></p>
+					<!--<p><a href="http://www.pygrunn.org/" class="pygrunn-logo"></a> <small>2017</small></p>-->
+					<p><a href=http://pygrunn.org>PyGrunn 2017</a></p>
+				</section>
+				<section>
+				<section>
+					<h3>Automagically Serverize Your <span style="border-bottom: 10px solid red;">Pipelines</span></h3>
+				</section>
+				<section>
+					<img src=img/pmb-raw.png>
+				</section>
+				<section>
+					<img src=img/pmb-der.png>
+				</section>
+				<section>
+					<h3>The Unix Philosophy</h3>
+					<ul>
+						<li>Write programs that do one thing and do it well.</li>
+						<li>Write programs to work together.</li>
+						<li>Write programs to handle text streams, because that is a universal interface.</li>
+					</ul>
+					<p>(Doug McIlroy)</p>
+				</section>
+				<section>
+					<h3>A Pipeline</h3>
+					<pre><code class=bash data-trim style="white-space: pre-wrap;">
+$ cat data/01.txt | ./bin/tokenize -m models/tokenizer.model | ./bin/parse -m models/parser.model &gt; out/01.parse
+					</code></pre>
+				</section>
+				<section>
+					<h3>A Makefile</h3>
+					<pre><code class=Makefile data-trim>
+out/%.tok : data/%.txt bin/tokenize models/tokenizer.model
+	cat $&lt; | ./bin/tokenize -m models/tokenizer.model &gt; $@
+
+out/%.parse : out/%.tok bin/parse models/parser.model
+	cat $&lt; | ./bin/parse -m models/parser.model &gt; $@
+					</code></pre>
+				</section>
+				<section>
+					<img src=img/orchestration.png class=noborder>
+				</section>
+				<section>
+					<h3>Runtime</h3>
+					<img class=noborder src=img/batch.png>
+					<table>
+						<tr>
+							<table style="width: 100%;">
+								<tr>
+									<td>Load model</td>
+									<td style="text-align: right;">Process</td>
+								</tr>
+							</table>
+						</tr>
+						<tr>
+							<table style="width: 100%; height: 1em;">
+								<tr>
+									<td style="background: red; width: 1%;"></td>
+									<td style="background: orange;"></td>
+								</tr>
+							</table>
+						</tr>
+						<tr>
+							<table style="width: 100%;">
+								<tr>
+									<td>10s</td>
+									<td style="text-align: right;">3h</td>
+								</tr>
+							</table>
+						</tr>
+					</table>
+				</section>
+				<section>
+					<h3>Runtime</h3>
+					<table class=nolines style="width: 100%;">
+						<tr>
+							<td style="width: 50%"><img class=noborder src=img/single01.png></td>
+							<td style="vertical-align: middle;">
+								<table style="width: 100%; font-size: large;">
+									<tr>
+										<td>
+											<table style="width: 100%; height: 1em;">
+												<tr>
+													<td>Load model</td>
+													<td style="text-align: right;">Process</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<table style="width: 100%; height: 1em;">
+												<tr>
+													<td style="background: red; width: 99%;"></td>
+													<td style="background: orange;"></td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<table style="width: 100%; height: 1em;">
+												<tr>
+													<td>10s</td>
+													<td style="text-align: right;">0.1s</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td><img class=noborder src=img/single02.png></td>
+							<td style="vertical-align: middle;">
+								<table style="width: 100%; font-size: large;">
+									<tr>
+										<td>
+											<table style="width: 100%; height: 1em;">
+												<tr>
+													<td>Load model</td>
+													<td style="text-align: right;">Process</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<table style="width: 100%; height: 1em;">
+												<tr>
+													<td style="background: red; width: 99%;"></td>
+													<td style="background: orange;"></td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<table style="width: 100%; height: 1em;">
+												<tr>
+													<td>10s</td>
+													<td style="text-align: right;">0.1s</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td><img class=noborder src=img/single03.png></td>
+							<td style="vertical-align: middle;">
+								<table style="width: 100%; font-size: large;">
+									<tr>
+										<td>
+											<table style="width: 100%; height: 1em;">
+												<tr>
+													<td>Load model</td>
+													<td style="text-align: right;">Process</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<table style="width: 100%; height: 1em;">
+												<tr>
+													<td style="background: red; width: 99%;"></td>
+													<td style="background: orange;"></td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<table style="width: 100%; height: 1em;">
+												<tr>
+													<td>10s</td>
+													<td style="text-align: right;">0.1s</td>
+												</tr>
+											</table>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: center;">…</td>
+							<td style="text-align: center;">…</td>
+						</tr>
+					</table>
+				</section>
+				</section>
+				<section>
+				<section>
+					<h3>Automagically <span style="border-bottom: 10px solid lime;">Serverize</span> Your Pipelines</h3>
+				</section>
+				<section>
+					<img class=noborder src=img/serverize00.png>
+				</section>
+				<section>
+					<img class=noborder src=img/serverize01.png>
+				</section>
+				<section>
+					<img class=noborder src=img/serverize02.png>
+				</section>
+				<!--<section>
+					<h3>Viasock Server</h3>
+					<ul>
+						<li>Receives <b>input records</b> from different Viasock client instances (<code>import socketserver</code>…)</li>
+						<li>Sends one input record at a time to wrapped <code>mytool</code> process</li>
+						<li>Waits for output record from wrapped <code>mytool</code> process</li>
+						<li>Sends output record back to corresponding client</li>
+						<li>Stores <code>mytool</code> STDERR in log</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Records</h3>
+					<p style="text-align: left;">Viasock supports all <b>text stream</b> input/output formats as long as</p>
+					<ul>
+						<li>Lines matching a certain regex terminate records, e.g.,
+							<ul>
+								<li><code>r''</code>: 1 line = 1 record</li>
+								<li><code>r'^$'</code>: records end with 1 empty line</li>
+							</ul>
+						</li>
+						<li>1 input record ≙ 1 output record</li>
+						<li><code>mytool</code> processes 1 record at a time</li>
+						<li><code>mytool</code> flushes output buffer after each record</li>
+					</ul>
+				</section>-->
+				<section>
+					<h3>Our Old Makefile</h3>
+					<pre><code class=Makefile data-trim>
+out/%.tok : data/%.txt bin/tokenize models/tokenizer.model
+	cat $&lt; | ./bin/tokenize -m models/tokenizer.model &gt; $@
+
+out/%.parse : out/%.tok bin/parse models/parser.model
+	cat $&lt; | ./bin/parse -m models/parser.model &gt; $@
+					</code></pre>
+				</section>
+				<section>
+					<h3>Our New Makefile (First Attempt)</h3>
+					<pre><code class=Makefile data-trim style="white-space: pre-wrap;">
+# Assuming viasock server wrapping tokenize is listening on tokenizer.socket
+out/%.tok : data/%.txt bin/tokenize models/tokenizer.model
+	cat $&lt; | viasock client tokenizer.socket &gt; $@
+
+# Assuming viasock server wrapping parse is listening on parser.socket
+out/%.parse : out/%.tok bin/parse models/parser.model
+	cat $&lt; | viasock client parser.socket &gt; $@
+					</code></pre>
+				</section>
+				</section>
+				<section>
+				<section>
+					<h3><span style="border-bottom: 10px solid #88bbff;">Automagically</span> Serverize Your Pipelines</h3>
+				</section>
+				<section>
+					<img class=noborder src=img/serverize02.png>
+				</section>
+				<section>
+					<img class=noborder src=img/serverize03.png>
+				</section>
+				<section>
+					<h3><code>viasock run</code>: the Magic Command</h3>
+					<pre><code class=bash data-trim>
+$ cat input1.txt | viasock run mytool -m mymodel &gt; output1.txt
+$ cat input2.txt | viasock run myothertool &gt; output2.txt
+$ cat input3.txt | viasock run mytool -m myothermodel &gt; output3.txt
+					</code></pre>
+					<!--<ul>
+						<li>wraps any <code>mytool</code> command</li>
+						<li>automatically starts corresponding server if not running</code>
+						<li>different servers for different commands (including options)</li>
+						<li>different server if <code>mytool</code> or its file inputs change</li>
+						<li>automatically shuts down idle server after user-defined timeout</li>
+					</ul>-->
+				</section>
+				<section>
+					<h3>Our New Makefile</h3>
+					<pre><code class=Makefile data-trim>
+out/%.tok : data/%.txt bin/tokenize models/tokenizer.model
+	cat $&lt; | viasock run ./bin/tokenize -m models/tokenizer.model &gt; $@
+
+out/%.parse : out/%.tok bin/parse models/parser.model
+	cat $&lt; | viasock run ./bin/parse -m models/parser.model &gt; $@
+					</code></pre>
+				</section>
+				<section style="font-size: xx-large;">
+					<h3>How <code>viasock run</code> Finds the Right Server</h3>
+					<p>Example command:</p>
+					<pre><code class=bash>viasock run --server-timeout 3600 ./bin/parse -m models/parser.model</code></pre>
+					<p><code>$SERVERID</code> = hash of</code>
+					<ul>
+						<li>Viasock options (e.g., <code>3600</code>)</li>
+						<li>Program name (e.g., <code>./bin/parse</code>)</li>
+						<li>Program mtime</li>
+						<li>Program arguments (e.g., <code>models/parser.model</code>)</li>
+						<li>Program argument mtimes</li>
+					</ul>
+					<p>Uses/starts server listening on <code>./.viasock/sockets/$SERVERID</code></p>
+				</section>
+				</section>
+				<section>
+				<section>
+					<h3>Summary</h3>
+				</section>
+				<section>
+					<h3>Problem</h3>
+					<ul>
+						<li>Frequently running a program with high startup overhead on small data</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Problems with Conventional Client/Server Setups</h3>
+					<ul>
+						<li>Poor separation of concerns
+							<ul>
+								<li>violates Unix philosophy</li>
+								<li>no reuse of client/server code</li>
+							</ul>
+						</li>
+						<li>Devops!
+							<ul>
+								<li>server must run</li>
+								<li>server must restart when <code>mytool</code> or model etc. changes</li>
+							</ul>
+						</li>
+						<li>Less flexible: run <code>mytool</code> with different options?</li>
+					</ul>
+				</section>
+				<section>
+					<h3>The Viasock Solution</h3>
+					<ul>
+						<li>Leave <code>mytool</code> as is</li>
+						<li>Viasock server process wraps it</li>
+						<li><code>viasock run</code> provides transparent access
+							<ul>
+								<li>starts server if needed</li>
+								<li>different servers for different options</li>
+								<li>new server when <code>mytool</code> or file arguments change</li>
+							</ul>
+						</li>
+					<ul>
+				</section>
+				<section>
+					<h3>Viasock Limitations</h3>
+					<ul>
+						<li>No load balancing yet (in case <code>mytool</code> throughput is too low)</li>
+						<li>Requires <code>mytool</code> to process 1 record at a time and flush its output buffer after each record</li>
+					</ul>
+				</section>
+				<section>
+					<img src=img/socks.jpg>
+					<p style="font-size: small;"><a href=https://www.flickr.com/photos/ilker/10513060426>ilker ender</a>, <a href=https://creativecommons.org/licenses/by-nc/2.0/>CC-BY-NC</a></p>
+					<p><a href=https://github.com/texttheater/viasock>https://github.com/texttheater/viasock</a></p>
+				</section>
+				</section>
 			</div>
 		</div>
 
@@ -37,6 +437,7 @@
 			// - https://github.com/hakimel/reveal.js#configuration
 			// - https://github.com/hakimel/reveal.js#dependencies
 			Reveal.initialize({
+				history: true,
 				dependencies: [
 					{ src: 'plugin/markdown/marked.js' },
 					{ src: 'plugin/markdown/markdown.js' },
