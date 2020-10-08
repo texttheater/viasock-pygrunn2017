@@ -23,6 +23,9 @@
     "node": ">=4.0.0"
   },
   "devDependencies": {
+    "bl": ">=1.2.3",
+    "cryptiles": ">=4.1.2",
+    "diff": ">=3.5.0",
     "express": "^4.17.1",
     "grunt": "~1.0.1",
     "grunt-autoprefixer": "~3.0.3",
@@ -36,6 +39,7 @@
     "grunt-retire": "~0.3.10",
     "grunt-sass": "^3.1.0",
     "grunt-zip": "~0.17.1",
+    "hoek": ">=4.2.1",
     "mustache": "~2.2.1",
     "node-sass": "^4.14.1",
     "socket.io": "^2.3.0"
